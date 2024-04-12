@@ -80,6 +80,16 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+                        <GridViewColumn Header="Color">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Rectangle Height="12" Width="12" Fill="{Binding Color}" />
+                                    <!-- You can add non-binded values too to each column.
+                                     These values will simply be added to every row
+                                     and be the same. -->
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                     </GridView>
                 </ListView.View>
             </ListView>
