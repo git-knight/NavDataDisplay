@@ -94,7 +94,7 @@
             <Label Content="Label" x:Name="ttt"/>
             <Button Content="Показать Атм. Давление" Click="Button_Click_2"/>
             <Button Content="Показать Направление" Click="Button_Click_3"/>
-            <CheckBox x:Name="cb_yaling" Content="Выровнять по высоте" Checked="CheckBox_Checked" Unchecked="cb_yaling_Unchecked"/>
+            <CheckBox x:Name="cb_yaling" Content="Выровнять по высоте" Checked="CheckBox_Checked" Unchecked="cb_yaling_Unchecked" IsChecked="True"/>
         </StackPanel>
 
     </Grid>

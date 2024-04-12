@@ -326,9 +326,11 @@ namespace NavDataDisplay
         const double xmin = 30;
         const double ymin = 30;
         const double ymax = 400;
+        const double graphYoffsetTop = 15;
+        const double graphYoffsetBottom = 15;
 
         double ValueToGraphY(double value)
-            => (value - valMin) / (valMax - valMin) * gridView1.ActualHeight;
+            => (value - valMin) / (valMax - valMin) * (gridView1.ActualHeight);// - graphYoffsetTop - graphYoffsetBottom);
 
         void UpdateViewBorders()
         {
@@ -519,8 +521,8 @@ namespace NavDataDisplay
             var step = ViewRange.Length / steps;
 
 
-            var yHeight = gridView1.ActualHeight;
-            if (yHeight == 0) return;
+            var yHeight = gridView1.ActualHeight - graphYoffsetTop - graphYoffsetBottom;
+            if (yHeight <= 0) return;
 
             DrawXAxis();
 
@@ -956,7 +958,7 @@ namespace NavDataDisplay
 
             var offset = valMax - valMin;
             valMin -= offset * 0.035;
-            valMax += offset * 0.035;
+            valMax += offset * 0.195;
         }
 
         private void graphDraw2_SizeChanged(object sender, SizeChangedEventArgs e)
