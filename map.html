@@ -1,0 +1,538 @@
+﻿<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Яндекс.Карты - Метки</title>
+    <!--
+    <script type="text/javascript" src="https://control.autofon.ru/js/jquery-3.6.0.min.js" />
+    <script type="text/javascript" src="https://control.autofon.ru/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/jquery-migrate-3.3.2.min.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/jquery-ui.min.js?1"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/moment.min.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/moment.ru.min.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/moment-timezone-with-data-2010-2020.min.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/bootstrap-datetimepicker.min.js?3"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/translate.min.js?1"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/select2.min.js?1"></script>
+    <!--script type="text/javascript" src="//maps.google.com/maps/api/js?language=en"></script--
+    <script type="text/javascript" src="https://control.autofon.ru/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/detectmobilebrowser.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/jquery.form.min.js"></script>
+    <script type="text/javascript" src="https://control.autofon.ru/js/svg_icons.min.js?1605215911"></script>
+    <script src="https://control.autofon.ru/js/common.min.js?1690550985" />-->
+    <script type="text/javascript">
+
+        var yMap;
+        function init() {
+            yMap = createMap(55.7522, 37.6156);
+
+            addMarkColored(yMap, 55.7522, 37.6156, 14, 20, '#dd0000');
+
+            var myPolygon = new ymaps.Polygon([
+                /**
+                 * Specifying the coordinates of the vertices of the polygon.
+                 *  The coordinates of the vertices of the external contour.
+                 */
+                [
+                    [55.75, 37.50],
+                    [55.80, 37.60],
+                    [55.75, 37.70],
+                    [55.70, 37.70],
+                    [55.70, 37.50]
+                ],
+                // The coordinates of the vertices of the inner contour.
+                [
+                    [55.75, 37.52],
+                    [55.75, 37.68],
+                    [55.65, 37.60]
+                ]
+            ], {
+                /**
+                 * Describing the properties of the geo object.
+                 *  The contents of the balloon.
+                 */
+                hintContent: "Polygon"
+            }, {
+                /**
+                 * Setting geo object options.
+                 *  Fill color.
+                 */
+                fillColor: '#00FF0088',
+                // The stroke width.
+                strokeWidth: 5
+            });
+
+            // Adding the polygon to the map.
+            //yMap.geoObjects.add(myPolygon);
+        }
+
+        function getColorByMNC(mnc) {
+            if (mnc == 1)
+                return "#bc2323"; // MTC
+            if (mnc == 2)
+                return "#23bc23"; // МегаФон
+            if (mnc == 99)
+                return "#2323bc"; // Билайн
+            return "#232323";
+        }
+
+    </script>
+
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=449ad020-463a-49be-8754-1fde35e467ae" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        ymaps.ready(init);
+        var testdot = null;
+
+        var radiusEarth = 6372795
+
+        var previewLocation = null
+
+        function calculateDistance(locationClass, ptPrev=null) {
+            if (ptPrev != null) {
+                previewLocation = ptPrev
+            }
+            else if (previewLocation == null) {
+                previewLocation = locationClass
+                return 31
+            }
+
+            var lat1 = previewLocation[0] * Math.PI / 180
+            var lat2 = locationClass[0] * Math.PI / 180
+
+            var long1 = previewLocation[1] * Math.PI / 180
+            var long2 = locationClass[1] * Math.PI / 180
+
+            var cl1 = Math.cos(lat1)
+            var cl2 = Math.cos(lat2)
+            var sl1 = Math.sin(lat1)
+            var sl2 = Math.sin(lat2)
+            var delta = long2 - long1
+            var cDelta = Math.cos(delta)
+            var sDelta = Math.sin(delta)
+
+            var y = Math.sqrt(Math.pow(cl2 * sDelta, 2) + Math.pow(cl1 * sl2 - sl1 * cl2 * cDelta, 2))
+            var x = sl1 * sl2 + cl1 * cl2 * cDelta
+            var ad = Math.atan2(y, x)
+            var dist = (ad * radiusEarth)
+            if (dist > 30) {
+                previewLocation = locationClass
+            }
+
+            console.log("distance: " + dist);
+            return dist
+        }
+
+        function createMap(cLat, cLon) {
+            return new ymaps.Map("map_canvas", {
+                center: [cLat, cLon],
+                zoom: 13,
+                controls: ['smallMapDefaultSet'],
+            });
+            addArrow(0);
+        }
+        var lineHeight = 0.000027*6.5;
+
+        function gotoRandom() {
+            //ymaps.setCenter([55.12059336166458, 61.23999754716336]);
+            yMap.setCenter([45.0701, 38.9048]);
+        }
+
+        var index = 0;
+        function addMark(myMap, lat, lon, mnc, caption) {
+            var myGeocoder = ymaps.geocode([lat, lon], { kind: 'house' });
+            var id = index++;
+
+            // myGeocoder.then(
+            // 	function (res) {
+            // 		var house = res.geoObjects.get(0);
+            // 		var name = house.properties.get('name');
+
+            // 		var myPlacemark = new ymaps.Placemark([lat, lon], {
+            // 			//iconContent: "Москва",
+            // 			hintContent: '<span style="font-family: Verdana, Arial, sans-serif; font-size: 14px;">'+caption+'</span>',
+            // 			balloonContent: '<span style="font-family: Verdana, Arial, sans-serif; font-size: 14px;">' + caption + '</span>',
+            // 			//iconCaption: caption
+            // 		});
+
+            // 		myMap.geoObjects.add(myPlacemark);
+            // 	},
+            // 	function (err) {
+            var myPlacemark = new ymaps.Placemark([lat, lon], {
+                //iconContent: "Москва",
+                hintContent: '<span style="font-family: Verdana, Arial, sans-serif; font-size: 14px;">' + caption + '</span>',
+                balloonContent: '<span style="font-family: Verdana, Arial, sans-serif; font-size: 14px;">' + caption + '</span>',
+                //iconCaption: caption
+            });
+
+            myMap.geoObjects.add(myPlacemark);
+            // }
+            // );
+        }
+
+        function addMarkPrecise(map, lat, lon, opacity, precision, mnc, caption) {
+            //addMark(map, lat, lon, mnc, caption);
+
+            precision = 76;
+            var myCircle = new ymaps.Circle([[lat, lon], precision],
+                { balloonContent: 'Точность определения координат: ' + precision + 'м.' },
+                { strokeOpacity: 0.45, fillOpacity: opacity, fillColor: getColorByMNC(mnc) });
+
+            map.geoObjects.add(myCircle);
+
+        }
+
+        var ptPrev = null;
+        var ptCount = 0;
+        function resetArrows() {
+            yMap.geoObjects.removeAll();
+        }
+        function startPath() {
+            ptPrev = null;
+            ptCount = 0;
+
+        }
+        function addArrow(pt1, color ='#00aa22', id=-1) {
+            if (ptPrev == null) {
+                ptPrev = pt1;
+                return;
+            }
+            var pt0 = ptPrev;
+
+            var points = []
+                //q = this.getGeometry().getCoordinates(),
+            var mCenter = yMap.getCenter();
+            //u = a(ptCoords, this.options.get("arrowMinLength", 7), this.options.get("arrowMaxLength", 7));
+            /*points.push(i(q));
+            if (u > 0) {
+                var w = [q[q.length - 2], q[q.length - 1]],
+                    v = b(w[0], w[1]),
+                    s = h(w, v),
+                    t = this.options.get("arrowAngle", 30) / 180 * Math.PI,
+                    x = j(s, u, t),
+                    r = [x[0], s[1]],
+                    p = [x[1], s[1]],
+                    z = h([x[0], x[1]], -v);
+                r = h(r, -v);
+                p = h(p, -v);
+                points.push(i(r));
+                points.push(i(p));
+                points.push(i(z));
+            }*/
+            
+            var size = [0.001, 0.00003]
+            var halfHt = lineHeight / 2
+            var x = dist(pt0, pt1)
+
+            //var points = [
+            //    [x, halfHt],
+            //    [0, halfHt],
+            //    [0, -halfHt],
+            //    [x, -halfHt],
+
+            //    //[mCenter[0] - size[0], mCenter[1] - lineHeight],
+            //    //[mCenter[0] - size[0], mCenter[1] + lineHeight],
+            //    //[mCenter[0] + size[0], mCenter[1] + lineHeight],
+            //    //[mCenter[0] + size[0], mCenter[1] - lineHeight],
+            //];
+
+            //points = rotatePts(points, getAngle(pt0, pt1))
+            //points = points.map((pt) => [pt[0] + pt0[0], pt[1] + pt0[1]])
+
+            var line90 = squeeze(rotate90(normalized(pt0, pt1)))
+            var isArrow = (ptCount % 10 == 9);
+            var arrowOffset = isArrow ? lineHeight / 1.5 : 0;
+            var points = [
+                vadd(pt0, line90, -arrowOffset),
+                vadd(pt1, line90, isArrow ? 0.25 * lineHeight : 0),
+                vadd(pt1, line90, isArrow ? 0.75 * lineHeight : lineHeight),
+                vadd(pt0, line90, lineHeight + arrowOffset),
+            ]
+
+            line1 = new ymaps.Polygon(
+                [
+                    points,
+                    []
+                ], 
+                { hintContent: "Ломаная" }, 
+                {
+                    draggable: false,
+                    fillColor: color,
+                    strokeWidth: 0
+                },
+            )
+            line1.events.add('click', function () {
+                line1.properties.set({
+                    fillColor: "#00fffff"
+                });
+                chrome.webview.postMessage("" + id);
+                
+
+            });
+            //line1.options.fillColor="#33ffff";
+            yMap.geoObjects.add(line1)
+            //yMap.setBounds(line1.geometry.getBounds());
+            //yMap.setCenter([45.0701, 38.9048]);
+            //return y;
+            ptPrev = pt1;
+            ptCount++;
+        } 
+
+        function test1() {
+            resetArrows();
+            startPath();
+            addArrow([55.55665588378906, 37.60521697998047]);
+            addArrow([55.555686950683594, 37.605655670166016]);
+            addArrow([55.554534912109375, 37.60575866699219]);
+            addArrow([55.55328369140625, 37.605491638183594]);
+            addArrow([55.5519905090332, 37.605594635009766]);
+            addArrow([55.55058670043945, 37.605674743652344]);
+            addArrow([55.54930114746094, 37.60573959350586]);
+            addArrow([55.547908782958984, 37.60585403442383]);
+            addArrow([55.54646682739258, 37.60610580444336]);
+            addArrow([55.54515075683594, 37.60646438598633]);
+            addArrow([55.543880462646484, 37.60693359375]);
+            addArrow([55.54252624511719, 37.607513427734375]);
+            addArrow([55.54130172729492, 37.60806655883789]);
+            addArrow([55.54006576538086, 37.60862350463867]);
+            addArrow([55.538814544677734, 37.609127044677734]);
+            addArrow([55.53757095336914, 37.609561920166016]);
+            addArrow([55.53633117675781, 37.60990905761719]);
+            addArrow([55.534976959228516, 37.61021041870117]);
+            addArrow([55.533714294433594, 37.61040115356445]);
+            addArrow([55.53244400024414, 37.61050796508789]);
+            addArrow([55.531185150146484, 37.61054229736328]);
+            addArrow([55.52994918823242, 37.61050033569336]);
+            addArrow([55.52873611450195, 37.61039352416992]);
+            addArrow([55.527427673339844, 37.61018753051758]);
+            addArrow([55.526241302490234, 37.60992431640625]);
+            addArrow([55.52503204345703, 37.6096076965332]);
+            addArrow([55.523780822753906, 37.60928726196289]);
+            addArrow([55.52251052856445, 37.60896682739258]);
+            addArrow([55.52123260498047, 37.60872268676758]);
+            addArrow([55.519805908203125, 37.6085090637207]);
+            addArrow([55.51850891113281, 37.608375549316406]);
+            addArrow([55.517242431640625, 37.608280181884766]);
+            addArrow([55.515960693359375, 37.60826873779297]);
+            addArrow([55.51471710205078, 37.60829162597656]);
+            addArrow([55.51329040527344, 37.60839080810547]);
+            addArrow([55.51197814941406, 37.60853958129883]);
+            addArrow([55.51064682006836, 37.608665466308594]);
+            addArrow([55.509334564208984, 37.608802795410156]);
+            addArrow([55.50804138183594, 37.608924865722656]);
+            addArrow([55.506752014160156, 37.60906219482422]);
+            addArrow([55.505313873291016, 37.609214782714844]);
+            addArrow([55.50404739379883, 37.60934829711914]);
+            addArrow([55.502777099609375, 37.60948944091797]);
+            addArrow([55.501487731933594, 37.609657287597656]);
+            addArrow([55.500205993652344, 37.609840393066406]);
+            addArrow([55.498924255371094, 37.61004638671875]);
+            addArrow([55.49748229980469, 37.610294342041016]);
+            addArrow([55.49618148803711, 37.61051940917969]);
+            addArrow([55.49489212036133, 37.610774993896484]);
+            addArrow([55.49363327026367, 37.61103439331055]);
+            addArrow([55.49238586425781, 37.61130142211914]);
+            addArrow([55.49115753173828, 37.61158752441406]);
+            addArrow([55.489749908447266, 37.6119384765625]);
+            addArrow([55.48847961425781, 37.612281799316406]);
+            addArrow([55.48723220825195, 37.61259841918945]);
+            addArrow([55.486000061035156, 37.612911224365234]);
+            addArrow([55.484771728515625, 37.61324691772461]);
+            addArrow([55.483516693115234, 37.61357879638672]);
+            addArrow([55.48210525512695, 37.614013671875]);
+            addArrow([55.48081970214844, 37.61436462402344]);
+            addArrow([55.47954559326172, 37.61468505859375]);
+            addArrow([55.478302001953125, 37.615020751953125]);
+            addArrow([55.477081298828125, 37.61534881591797]);
+            addArrow([55.47585678100586, 37.615665435791016]);
+            addArrow([55.47447204589844, 37.61602783203125]);
+            addArrow([55.473228454589844, 37.61638259887695]);
+            addArrow([55.471961975097656, 37.61671447753906]);
+            addArrow([55.470699310302734, 37.61704635620117]);
+            addArrow([55.469451904296875, 37.61735916137695]);
+            addArrow([55.4682502746582, 37.617671966552734]);
+            addArrow([55.46695327758789, 37.61801528930664]);
+            addArrow([55.465755462646484, 37.618350982666016]);
+            addArrow([55.464508056640625, 37.61867904663086]);
+            addArrow([55.463226318359375, 37.618953704833984]);
+            addArrow([55.46192169189453, 37.6191291809082]);
+            addArrow([55.460487365722656, 37.61921310424805]);
+            addArrow([55.45919418334961, 37.619178771972656]);
+            addArrow([55.45786666870117, 37.6190071105957]);
+            addArrow([55.45656967163086, 37.618770599365234]);
+            addArrow([55.45527648925781, 37.61855697631836]);
+            addArrow([55.45402908325195, 37.61833572387695]);
+            addArrow([55.45264434814453, 37.618099212646484]);
+            addArrow([55.45133972167969, 37.61785888671875]);
+            addArrow([55.45003128051758, 37.61763000488281]);
+            addArrow([55.44871520996094, 37.6174201965332]);
+            addArrow([55.447425842285156, 37.617183685302734]);
+            addArrow([55.44610595703125, 37.6169548034668]);
+            addArrow([55.44464874267578, 37.6167106628418]);
+            addArrow([55.44337844848633, 37.616477966308594]);
+            addArrow([55.44202423095703, 37.616233825683594]);
+            addArrow([55.44060134887695, 37.61598587036133]);
+            addArrow([55.439125061035156, 37.61573028564453]);
+            addArrow([55.437599182128906, 37.6154670715332]);
+            addArrow([55.43586730957031, 37.61516189575195]);
+            addArrow([55.434329986572266, 37.61490249633789]);
+            addArrow([55.4329948425293, 37.61466598510742]);
+            addArrow([55.43165969848633, 37.61442947387695]);
+            addArrow([55.43034744262695, 37.61406707763672]);
+            addArrow([55.429080963134766, 37.613651275634766]);
+            addArrow([55.427703857421875, 37.613162994384766]);
+            addArrow([55.42646026611328, 37.61270523071289]);
+            addArrow([55.42518997192383, 37.61225891113281]);
+            addArrow([55.423927307128906, 37.61179733276367]);
+            addArrow([55.42266845703125, 37.6113395690918]);
+            addArrow([55.421363830566406, 37.61085891723633]);
+            addArrow([55.419944763183594, 37.61034393310547]);
+            addArrow([55.41865539550781, 37.60987854003906]);
+            addArrow([55.41735076904297, 37.60941696166992]);
+            addArrow([55.4160041809082, 37.60894012451172]);
+            addArrow([55.41464614868164, 37.608455657958984]);
+            addArrow([55.413291931152344, 37.60796356201172]);
+            addArrow([55.411922454833984, 37.60746765136719]);
+            addArrow([55.41069030761719, 37.6070556640625]);
+            addArrow([55.409427642822266, 37.60661697387695]);
+            addArrow([55.40815353393555, 37.60623550415039]);
+            addArrow([55.40686798095703, 37.60589599609375]);
+            addArrow([55.40557861328125, 37.605621337890625]);
+            addArrow([55.4041748046875, 37.6053352355957]);
+            addArrow([55.40317153930664, 37.604984283447266]);
+            addArrow([55.40292739868164, 37.603641510009766]);
+            addArrow([55.4036750793457, 37.60325241088867]);
+            addArrow([55.40424728393555, 37.6044921875]);
+            addArrow([55.40483474731445, 37.60650634765625]);
+            addArrow([55.40549087524414, 37.60816955566406]);
+            addArrow([55.40657424926758, 37.6084098815918]);
+            addArrow([55.407684326171875, 37.60752487182617]);
+            addArrow([55.40884780883789, 37.607051849365234]);
+            addArrow([55.41011047363281, 37.60745620727539]);
+            addArrow([55.411521911621094, 37.607887268066406]);
+            addArrow([55.41282272338867, 37.60837173461914]);
+            addArrow([55.41414260864258, 37.60883712768555]);
+            addArrow([55.41542434692383, 37.609291076660156]);
+            addArrow([55.41671371459961, 37.609745025634766]);
+            addArrow([55.418006896972656, 37.610198974609375]);
+            addArrow([55.4194450378418, 37.61071014404297]);
+            addArrow([55.42080307006836, 37.6112060546875]);
+            addArrow([55.4221076965332, 37.6116828918457]);
+            addArrow([55.42339324951172, 37.61214828491211]);
+            addArrow([55.424644470214844, 37.61260986328125]);
+            addArrow([55.4259147644043, 37.61306381225586]);
+            addArrow([55.4273796081543, 37.61360168457031]);
+            addArrow([55.42870330810547, 37.61406707763672]);
+            addArrow([55.43002700805664, 37.614540100097656]);
+            addArrow([55.431373596191406, 37.61491012573242]);
+            yMap.setCenter([55.431373596191406, 37.61491012573242]);
+
+        }
+        
+        function getLineBetween(u, len, angle) {
+            var s = u[0],
+                r = u[1],
+                ptX = len * Math.sin(angle),
+                ptY = r[1] - len * Math.cos(angle);
+            return [
+                [s[0] - ptX, ptY],
+                [s[0] + ptX, ptY]
+            ]
+        }
+
+        function vadd(pt1, pt2, pt2Mul = 1) {
+            return [pt1[0] + pt2[0] * pt2Mul, pt1[1] + pt2[1] * pt2Mul]
+        }
+
+        function squeeze(vec) {
+            return [vec[0], vec[1] * 2.5];
+        }
+
+        function rotatePts(ptsIn, angle) {
+            var pts = [];
+            for (var i = 0; i < ptsIn.length; i++) {
+                x = ptsIn[i][0];
+                y = ptsIn[i][1];
+                var angX = Math.sin(angle);
+                var angY = Math.cos(angle);
+                pts.push([x * angY - y * angX, x * angX + y * angY])
+            }
+            return pts
+        }
+
+        function normalized(pt1, pt2) {
+            var vlen = dist(pt1, pt2)
+            return [(pt2[0] - pt1[0]) / vlen, (pt2[1] - pt1[1]) / vlen]
+        }
+
+        function rotate90(vec, mul=1) {
+            return [vec[1] * mul, -vec[0] * mul]
+        }
+        
+
+        function movePts(ptsIn, coord) {
+            var pts = [];
+            for (var i = 0; i < ptsIn.length; i++) {
+                pts.push([x * angY - y * angX, x * angX + y * angY])
+            }
+            return pts
+        }
+
+        function getAngle(a1, a2) {
+            console.log("angle: " + (Math.PI / 2 - Math.atan2(a2[1] - a1[1], a2[0] - a1[0])))
+            return Math.PI / 2 - Math.atan2(a2[1] - a1[1], a2[0] - a1[0])
+        }
+
+        function skipLast(arr) {
+            var res = arr.slice();
+            for (var p = arr.length - 2; p > -1; p--) {
+                res.push(arr[p])
+            }
+            return res
+        }
+
+        function a(v, r, q) {
+            var u = 0;
+            for (var t = 1, p = v.length; t < p; t++) {
+                u += l(v[t][0] - v[t - 1][0], v[t][1] - v[t - 1][1]);
+                if (u / 3 > q) {
+                    return q
+                }
+            }
+            var s = u / 3;
+            return s < r ? 0 : s
+        }
+
+        function length(x, y) {
+            return Math.sqrt(x * x + y * y)
+        }
+        function dist(a, b) {
+            return length(a[0]-b[0], a[1]-b[1])
+        }
+        function addMarkColored(map, lat, lon, opacity, precision, fillcolor) {
+            //addMark(map, lat, lon, mnc, caption);
+
+            precision = 90;
+            var myCircle = new ymaps.Circle([[lat, lon], precision],
+                { balloonContent: 'Точность определения координат: ' + precision + 'м.' },
+                { strokeOpacity: 0.45, fillOpacity: opacity + 0.15, fillColor: fillcolor });
+
+            map.geoObjects.add(myCircle);
+        } 
+    </script>
+    <script>
+
+    </script>
+    
+</head>
+
+<body onload="">
+    <!--<button onclick="switchMap('map_g','map_ya','map_o','bt_g', false);"/>-->
+    <div id="map_canvas" style="width: auto; height: 600px"></div>
+</body>
+</html>
+
+
+<!--
+    -->

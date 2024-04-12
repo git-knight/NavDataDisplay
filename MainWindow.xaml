@@ -1,0 +1,101 @@
+﻿<Window x:Class="NavDataDisplay.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NavDataDisplay" xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Title="Просмотр данных" Height="875" Width="1691" Loaded="Window_Loaded" Initialized="Window_Initialized" SizeChanged="Window_SizeChanged">
+    <Grid>
+        <TabControl Margin="0,0,200,0" Width="NaN" x:Name="tabs">
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5" MouseDown="ScrollViewer_MouseDown" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <GridSplitter Grid.Row="1" 
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  Background="Black"
+                                  ShowsPreview="True"
+                                  Height="5"/>
+                    <Canvas Margin="0,0,0,24" HorizontalAlignment="Left" Width="67" x:Name="cvYvalues"/>
+                    <ScrollViewer Margin="0,0,0,24" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" MouseMove="drawPointInfo" Initialized="ScrollViewer_Initialized" MouseDown="ScrollViewer_MouseDown">
+                        <Grid Width="2500" x:Name="gridView1" SizeChanged="gridView1_SizeChanged" MouseDown="ScrollViewer_MouseDown">
+                            <Canvas x:Name="graphDraw1" Loaded="graphDraw1_Loaded" MouseDown="ScrollViewer_MouseDown">
+                            </Canvas>
+                            <Canvas x:Name="graphDrawXline" Margin="0,0,0,31" Height="97" VerticalAlignment="Bottom" MouseDown="ScrollViewer_MouseDown">
+                                <Line
+                            X1="100" Y1="100"
+                            X2="50" Y2="120"
+                            Stroke="Black"
+                            StrokeThickness="1" />
+
+                            </Canvas>
+                        </Grid>
+                    </ScrollViewer>
+                    <StackPanel Orientation="Horizontal" Height="24" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
+                        <Button Content="&lt;" Width="25" Click="Map_Move_Right"/>
+                        <Button Content="+" Width="25" Click="Map_Plus_Click"/>
+                        <Button Content="-" Width="24" Click="Map_Minus_Click"/>
+                        <Label x:Name="lbPointValue" Content="Label"/>
+                        <Button Content=">" Width="25" Click="Map_Move_Left"/>
+                    </StackPanel>
+                    <Canvas x:Name="graphDraw2" Grid.Row="2" SizeChanged="graphDraw2_SizeChanged">
+                        <wpf:WebView2 x:Name="mapViewer" Loaded="mapViewer_Loaded" Initialized="mapViewer_Initialized" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="1500" Height="403" />
+                    </Canvas>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5">
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <StackPanel HorizontalAlignment="Right" Width="195">
+            <Label Content="Файлы"/>
+            <ListView x:Name="aaaaaaaaa" Height="100" d:ItemsSource="{Binding LogsList}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Favourite">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox Margin="5, 0" IsChecked="{Binding Selected}"/>
+                                    <!--d:SampleData ItemCount=5
+                                    Your control type and value goes here. Bind the value
+                                     to the name of the method that represents this value
+                                     in your .cs file. In my case, this was 'Favourite' -->
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Name">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="5, 0" Text="{Binding FileName}"/>
+                                    <!-- You can add non-binded values too to each column.
+                                     These values will simply be added to every row
+                                     and be the same. -->
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <Button Content="Удалить выбранное"/>
+            <Button Content="Добавить файл" Click="Button_Click_1"/>
+            <DatePicker x:Name="DateStart" FirstDayOfWeek="Monday" SelectedDateFormat="Long" SelectedDateChanged="DateStart_SelectedDateChanged" />
+            <Button Content="Показать" Click="Map_Redraw_Click"/>
+            <Button Content="Показать расстояние" Click="Map_Redraw_Distance_Click"/>
+            <Button Content="Сохранить" Click="Button_Click"/>
+            <Label Content="Label" x:Name="dtFrom"/>
+            <Label Content="Label" x:Name="dtTo"/>
+            <Label Content="Label" x:Name="ttt"/>
+            <Button Content="Показать Атм. Давление" Click="Button_Click_2"/>
+            <Button Content="Показать Направление" Click="Button_Click_3"/>
+            <CheckBox x:Name="cb_yaling" Content="Выровнять по высоте" Checked="CheckBox_Checked" Unchecked="cb_yaling_Unchecked"/>
+        </StackPanel>
+
+    </Grid>
+</Window>
