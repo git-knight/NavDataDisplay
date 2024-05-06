@@ -976,8 +976,7 @@ namespace NavDataDisplay
             if (iStepC >= 1 && iStepC < 120)
             {
 
-                NavDataEntry lastPt = null;
-                NavDataEntry cC = null;
+                var allPoints = new NavDataEntry[0];
                 foreach (var dataFile in LogsList.Where(x => x.Selected))
                 {
                     if (!dataFile.Data.TryGetValue(day, out var data))
@@ -989,15 +988,16 @@ namespace NavDataDisplay
                         var dtCurrent = ViewRange.Min + step * iStep;
                         var dtRange = new DateRange(dtCurrent, dtCurrent + step);
 
-                        var allPoints = data.Where(x => dtRange.Includes(x.Time)).ToArray();
-                        if (allPoints.Count() == 0)
+                        var allPointsTmp = data.Where(x => dtRange.Includes(x.Time)).ToArray();
+                        if (allPointsTmp.Count() == 0)
                             continue;
 
                         if (iStep == iStepC)
-                            cC = allPoints.Last();
+                            allPoints = allPointsTmp;
                     }
                 }
-                mapViewer.ExecuteScriptAsync($"yMap.setCenter([{cC.Lat}, {cC.Lon}]);\n");
+                var script = $"highlightPoints([{string.Join(",", allPoints.Select(x => x.ToJavascript()))}]);\n";
+                mapViewer.ExecuteScriptAsync(script);
             }
         }
 

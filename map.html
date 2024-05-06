@@ -183,6 +183,38 @@
 
         }
 
+
+
+        var currentHighlights = [];
+        function highlightPoints(points) {
+            currentHighlights.forEach(pt => {
+                var id = yMap.geoObjects.indexOf(pt)
+                if (id != -1)
+                    yMap.geoObjects.splice(id, 1)
+            })
+
+            currentHighlights = [];
+
+            points.forEach(pt => {
+
+                var myCircle = new ymaps.Circle([pt, 100],
+                    { balloonContent: 'coordinate' },
+                    { strokeOpacity: 0.45, fillOpacity: 0.2, fillColor: '#333333' });
+
+
+                yMap.geoObjects.add(myCircle);
+                currentHighlights.push(myCircle);
+            })
+
+            var center = points.reduce((center, pt) => vadd(center, pt))
+            center = vmul(center, 1/points.length)
+            yMap.setCenter(center);
+        }
+
+
+
+
+
         var ptPrev = null;
         var ptCount = 0;
         function resetArrows() {
@@ -426,7 +458,8 @@
             addArrow([55.42870330810547, 37.61406707763672]);
             addArrow([55.43002700805664, 37.614540100097656]);
             addArrow([55.431373596191406, 37.61491012573242]);
-            yMap.setCenter([55.431373596191406, 37.61491012573242]);
+            highlightPoints([[55.40483474731445, 37.60650634765625], [55.40549087524414, 37.60816955566406]])
+            //yMap.setCenter([55.40483474731445, 37.60650634765625]);
 
         }
         
@@ -443,6 +476,10 @@
 
         function vadd(pt1, pt2, pt2Mul = 1) {
             return [pt1[0] + pt2[0] * pt2Mul, pt1[1] + pt2[1] * pt2Mul]
+        }
+
+        function vmul(pt, val) {
+            return [pt[0] * val, pt[1] * val]
         }
 
         function squeeze(vec) {

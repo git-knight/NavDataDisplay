@@ -46,6 +46,8 @@ namespace NavDataDisplay
             return Speed.ToString("#.##") + " " + Time.ToString("G");
         }
 
+        public string ToJavascript() => $"[{Lat}, {Lon}]";
+
         const double radiusEarth = 6372795;
         internal void CalculateDistance(NavDataEntry prev)
         {
