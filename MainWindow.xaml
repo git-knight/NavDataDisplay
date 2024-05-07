@@ -70,7 +70,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Name">
+                        <GridViewColumn Header="Name" Width="100">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Margin="5, 0" Text="{Binding FileName}"/>
