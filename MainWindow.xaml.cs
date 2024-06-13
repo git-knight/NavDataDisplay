@@ -29,10 +29,11 @@ namespace NavDataDisplay
         Random rand = new Random();
 
         public ObservableCollection<NavDataFile> LogsList { get; set; } = new ObservableCollection<NavDataFile>();
-        Dictionary<string, NavDataFile> Logs = new Dictionary<string, NavDataFile>();
-        DateRange Dt = new DateRange();
-        DateRange ViewRange = new DateRange();
-        DateRange ViewBorders = new DateRange();
+        public ObservableCollection<string> DatesList { get; set; } = new ObservableCollection<string>();
+        Dictionary<string, NavDataFile> Logs = new();
+        DateRange Dt = new();
+        DateRange ViewRange = new();
+        DateRange ViewBorders = new();
         bool ViewingDist = false;
         int ViewDistFrom = 0, ViewDistTo = 0;
         int ViewDistLen, ViewDistStep = 125;
@@ -304,12 +305,23 @@ namespace NavDataDisplay
 
         void LoadDataFile(string path)
         {
+            path = path.ToLower();
+            if (Logs.Keys.Contains(path))
+                return;
+
             var dtFile = new NavDataFile(path);
 
             Logs.Add(path, dtFile);
             LogsList.Add(dtFile);
             Dt.Update(dtFile.DataRange.Min);
             Dt.Update(dtFile.DataRange.Max);
+            foreach(var dt in dtFile.Data.Keys)
+            {
+                var dtstr = dt.ToString("dd.M.yyyy");
+                if (!DatesList.Contains(dtstr))
+                    DatesList.Add(dtstr);
+                dateaaaaaaaaa.ItemsSource = DatesList;
+            }
 
             return;
         }
@@ -385,80 +397,6 @@ namespace NavDataDisplay
                     }
 
                     valPrev = val;
-
-                    //if (!dataFile.DataRange.Includes(dtLast, step))
-                    //    continue;
-
-                    //for (int data_set = 0; data_set < 1; data_set++)
-                    /*{
-                        var allPoints = data.Where(x => dtRange.Includes(x.Time)).ToArray();
-                        if (allPoints.Count() == 0)
-                            continue;
-
-                        var vMin = ValueToGraphY((allPoints.Min(x => x.GetValueByGraphNumber(CurrentSelectedParam))));
-                        var vMax = ValueToGraphY(allPoints.Max(x => x.GetValueByGraphNumber(CurrentSelectedParam)));
-                        var vMid = ValueToGraphY(allPoints.Sum(x => x.GetValueByGraphNumber(CurrentSelectedParam)) / allPoints.Length);
-
-                        dtRange = new DateRange(dtCurrent - step, dtCurrent);
-                        var allPointsLast = data.Where(x => dtRange.Includes(x.Time)).ToArray();
-                        if (allPointsLast.Count() == 0)
-                        {
-                            // draw circle?
-                        }
-                        else
-                        {
-
-                            var vMinLast = ValueToGraphY(allPointsLast.Min(x => x.GetValueByGraphNumber(CurrentSelectedParam)));
-                            var vMaxLast = ValueToGraphY(allPointsLast.Max(x => x.GetValueByGraphNumber(CurrentSelectedParam)));
-                            var vMidLast = ValueToGraphY(allPointsLast.Sum(x => x.GetValueByGraphNumber(CurrentSelectedParam)) / allPointsLast.Length);
-                            //vMinLast = 200 - vMinLast;
-                            //vMaxLast = 200 - vMaxLast;
-                            //vMidLast = 200 - vMidLast;
-
-
-
-                            Line myLineMid = new Line
-                            {
-                                Stroke = dataFile.Color,
-                                StrokeThickness = 1,
-
-                                X1 = xmin + (xmax - xmin) * (iStep - 1) / steps,
-                                X2 = xmin + (xmax - xmin) * iStep / steps,  // 150 too far
-                                Y1 = vMidLast,
-                                Y2 = vMid
-                            };
-                            graphDraw1.Children.Add(myLineMid);
-                            vMidLast = vMid;
-
-                            Line myLineMin = new Line
-                            {
-                                Stroke = dataFile.Color,
-                                Opacity = 0.7,
-                                StrokeThickness = 1,
-
-                                X1 = xmin + (xmax - xmin) * (iStep - 1) / steps,
-                                X2 = xmin + (xmax - xmin) * iStep / steps,  // 150 too far
-                                Y1 = vMinLast,
-                                Y2 = vMin
-                            };
-                            graphDraw1.Children.Add(myLineMin);
-                            vMinLast = vMin;
-
-                            Line myLineMax = new Line
-                            {
-                                Stroke = dataFile.Color,
-                                Opacity = 0.7,
-                                StrokeThickness = 1,
-
-                                X1 = xmin + (xmax - xmin) * (iStep - 1) / steps,
-                                X2 = xmin + (xmax - xmin) * iStep / steps,  // 150 too far
-                                Y1 = vMaxLast,
-                                Y2 = vMax
-                            };
-                            graphDraw1.Children.Add(myLineMax);
-                        }
-
-                    }*/
 
                 }
 
@@ -999,6 +937,76 @@ namespace NavDataDisplay
                 var script = $"highlightPoints([{string.Join(",", allPoints.Select(x => x.ToJavascript()))}]);\n";
                 mapViewer.ExecuteScriptAsync(script);
             }
+        }
+
+        private void DebugGraphShow(object sender, RoutedEventArgs e)
+        {
+            var g = new AGraph();
+            g.Feed(LogsList[0]);
+            var script = string.Join(", ", g.Marks.Select(x => $"[{x.Lat}, {x.Lon + 0.00015}, {x.Atm.ToString("#.##")}]"));
+            script = $"highlight([{script}])";
+            mapViewer.ExecuteScriptAsync(script);
+        }
+
+        private void dateaaaaaaaaa_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (dateaaaaaaaaa.SelectedItem == null) 
+                return;
+
+            var dtStr = dateaaaaaaaaa.SelectedItem as string;
+            var dt = DateTime.Parse(dtStr);
+
+
+            ViewRange = new DateRange(dt, dt + TimeSpan.FromDays(1));
+            RedrawGraph();
+        }
+
+        private void DebugGraphShowVisible(object sender, RoutedEventArgs e)
+        {
+            var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
+            var step = ViewRange.Length / steps;
+
+            var g = new AGraph();
+
+            foreach (var dataFile in LogsList.Where(x => x.Selected))
+            {
+                var marks = new List<GraphMark>();
+                if (!dataFile.Data.TryGetValue(day, out var data))
+                    continue;
+
+                /*var dtLast = DtDataOnly.Min;
+                var dtRangeFirst = new DateRange(dtLast, dtLast + step);
+                var allPointsFirst = data.Where(x => dtRangeFirst.Includes(x.Time)).ToArray();
+
+                var vMinLast = allPointsFirst.Min(x => x.Speed);
+                var vMaxLast = allPointsFirst.Max(x => x.Speed);
+                var vMidLast = allPointsFirst.Sum(x => x.Speed) / allPointsFirst.Length;
+                */
+
+                var atms = new List<float>();
+                for (var iStep = 1; iStep < steps; iStep++)
+                {
+                    var dtCurrent = ViewRange.Min + step * iStep;
+                    var dtRange = new DateRange(dtCurrent, dtCurrent + step);
+
+                    //if (!dataFile.DataRange.Includes(dtLast, step))
+                    //    continue;
+
+                    //for (int data_set = 0; data_set < 1; data_set++)
+                    {
+                        var allPoints = data.Where(x => dtRange.Includes(x.Time)).ToArray();
+                        if (allPoints.Count() == 0)
+                            continue;
+
+                        var vMid = allPoints.Sum(x => x.Atm) / allPoints.Length;
+                        marks.Add(new GraphMark(allPoints, vMid));
+                    }
+                }
+                g.Feed(marks);
+            }
+            var script = string.Join(", ", g.Marks.Select(x => $"[{x.Lat}, {x.Lon + 0.00015}, {x.Atm.ToString("#.##")}]"));
+            script = $"highlight([{script}])";
+            mapViewer.ExecuteScriptAsync(script);
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)

@@ -96,9 +96,14 @@
             <Button Content="Удалить выбранное"/>
             <Button Content="Добавить файл" Click="Button_Click_1"/>
             <DatePicker x:Name="DateStart" FirstDayOfWeek="Monday" SelectedDateFormat="Long" SelectedDateChanged="DateStart_SelectedDateChanged" />
+            <ListBox x:Name="dateaaaaaaaaa" Height="100" d:ItemsSource="{Binding Path=DatesList}" MouseDoubleClick="dateaaaaaaaaa_MouseDoubleClick">
+                
+            </ListBox>
             <Button Content="Показать" Click="Map_Redraw_Click"/>
             <Button Content="Показать расстояние" Click="Map_Redraw_Distance_Click"/>
             <Button Content="Сохранить" Click="Button_Click"/>
+            <Button Content="DEBUG" Click="DebugGraphShow"/>
+            <Button Content="DEBUG VISIBLE" Click="DebugGraphShowVisible"/>
             <Label Content="Label" x:Name="dtFrom"/>
             <Label Content="Label" x:Name="dtTo"/>
             <Label Content="Label" x:Name="ttt"/>

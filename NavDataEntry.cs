@@ -43,7 +43,7 @@ namespace NavDataDisplay
 
         public override string ToString()
         {
-            return Speed.ToString("#.##") + " " + Time.ToString("G");
+            return Atm.ToString("#.#####") + " " + Time.ToString("G");
         }
 
         public string ToJavascript() => $"[{Lat}, {Lon}]";

@@ -311,6 +311,39 @@
             ptCount++;
         } 
 
+        function highlight(points) {
+            for (var i = 0; i < points.length; i++) {
+
+                // Создаем геообъект с типом геометрии "Точка".
+                valueMarking = new ymaps.GeoObject({
+                    // Описание геометрии.
+                    geometry: {
+                        type: "Point",
+                        coordinates: [points[i][0], points[i][1] + 0.00005]
+                    },
+                    // Свойства.
+                    properties: {
+                        // Контент метки.
+                        iconContent: '' + points[i][2],
+                        balloonContent: 'hi'
+                    }
+                }, {
+                    // Опции.
+                    // Иконка метки будет растягиваться под размер ее содержимого.
+                    preset: 'twirl#redStretchyIcon',
+                    // Метку можно перемещать.
+                    draggable: true
+                });
+
+                yMap.geoObjects
+                    .add(valueMarking)
+            }
+        }
+
+        function htest() {
+            highlight([[55.55685043334961, 37.60530594482422, 986.20849609375], [55.55679702758789, 37.60545090332031, 986.20068359375], [55.55679702758789, 37.60546234741211, 986.22900390625]])
+        }
+
         function test1() {
             resetArrows();
             startPath();
