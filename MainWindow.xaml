@@ -6,10 +6,10 @@
         xmlns:local="clr-namespace:NavDataDisplay" xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
         Title="Просмотр данных" Height="875" Width="1691" Loaded="Window_Loaded" Initialized="Window_Initialized" SizeChanged="Window_SizeChanged">
-    <Grid>
+    <Grid MouseDown="tabs_MouseDown">
         <TabControl Margin="0,0,200,0" Width="NaN" x:Name="tabs">
             <TabItem Header="TabItem">
-                <Grid Background="#FFE5E5E5" MouseDown="ScrollViewer_MouseDown" >
+                <Grid Background="#FFE5E5E5">
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition Height="Auto"/>
@@ -23,7 +23,7 @@
                                   Height="5"/>
                     <Canvas Margin="0,0,0,24" HorizontalAlignment="Left" Width="67" x:Name="cvYvalues"/>
                     <ScrollViewer Margin="0,0,0,24" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" MouseMove="drawPointInfo" Initialized="ScrollViewer_Initialized" MouseDown="ScrollViewer_MouseDown">
-                        <Grid Width="2500" x:Name="gridView1" SizeChanged="gridView1_SizeChanged" MouseDown="ScrollViewer_MouseDown">
+                        <Grid Width="2500" x:Name="gridView1" SizeChanged="gridView1_SizeChanged" MouseWheel="gridView1_MouseWheel">
                             <Canvas x:Name="graphDraw1" Loaded="graphDraw1_Loaded" MouseDown="ScrollViewer_MouseDown">
                             </Canvas>
                             <Canvas x:Name="graphDrawXline" Margin="0,0,0,31" Height="97" VerticalAlignment="Bottom" MouseDown="ScrollViewer_MouseDown">
@@ -102,6 +102,7 @@
             <Button Content="Показать" Click="Map_Redraw_Click"/>
             <Button Content="Показать расстояние" Click="Map_Redraw_Distance_Click"/>
             <Button Content="Сохранить" Click="Button_Click"/>
+            <Button Content="Выбор отрезка" Click="SegmentSelectBtnClick"/>
             <Button Content="DEBUG" Click="DebugGraphShow"/>
             <Button Content="DEBUG VISIBLE" Click="DebugGraphShowVisible"/>
             <Label Content="Label" x:Name="dtFrom"/>

@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -900,13 +901,19 @@ namespace NavDataDisplay
             mapViewer.Height = e.NewSize.Height;
         }
 
-        private void ScrollViewer_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void ScrollViewer_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (segId != 0)
+            {
+                SelectNextSeg(e);
+                return;
+            }
+
             var xmax = GraphWidth - 15;
             var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
             var step = ViewRange.Length / steps;
             var iStepC = (int)Math.Round((e.GetPosition(CanvasCurr).X - xmin) / (xmax - xmin) * steps);
-            if (iStepC >= 1 && iStepC < 120)
+            if (iStepC >= 1 && iStepC < steps)
             {
 
                 var allPoints = new NavDataEntry[0];
@@ -1002,6 +1009,43 @@ namespace NavDataDisplay
             var script = string.Join(", ", g.Marks.Select(x => $"[{x.Lat}, {x.Lon + 0.00015}, {x.Atm.ToString("#.##")}]"));
             script = $"highlight([{script}])";
             mapViewer.ExecuteScriptAsync(script);
+        }
+
+        private void gridView1_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta > 0)
+                Map_Plus_Click(sender, null);
+            else Map_Minus_Click(sender, null);
+        }
+
+        private void tabs_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            return;
+        }
+
+
+        DateTime segA, segB;
+        int segId = 0;
+        private void SegmentSelectBtnClick(object sender, RoutedEventArgs e)
+        {
+            segId = 1;
+            ttt.Content = "выбор даты";
+        }
+
+        void SelectNextSeg(MouseButtonEventArgs e)
+        {
+            var xmax = GraphWidth - 15;
+            var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
+            var clickFrac = (e.GetPosition(CanvasCurr).X - xmin) / (xmax - xmin);
+
+            var date = ViewRange.Min + ViewRange.Length * clickFrac;
+
+            if (segId == 1)
+                dtFrom.Content = date;
+            else dtTo.Content = date;
+
+            segId = (segId + 1) % 3;
+
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
