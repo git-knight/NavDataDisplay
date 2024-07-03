@@ -24,9 +24,9 @@
                     <Canvas Margin="0,0,0,24" HorizontalAlignment="Left" Width="67" x:Name="cvYvalues"/>
                     <ScrollViewer Margin="0,0,0,24" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" MouseMove="drawPointInfo" Initialized="ScrollViewer_Initialized" MouseDown="ScrollViewer_MouseDown">
                         <Grid Width="2500" x:Name="gridView1" SizeChanged="gridView1_SizeChanged" MouseWheel="gridView1_MouseWheel">
-                            <Canvas x:Name="graphDraw1" Loaded="graphDraw1_Loaded" MouseDown="ScrollViewer_MouseDown">
+                            <Canvas x:Name="graphDraw1" Loaded="graphDraw1_Loaded">
                             </Canvas>
-                            <Canvas x:Name="graphDrawXline" Margin="0,0,0,31" Height="97" VerticalAlignment="Bottom" MouseDown="ScrollViewer_MouseDown">
+                            <Canvas x:Name="graphDrawXline" Margin="0,0,0,31" Height="97" VerticalAlignment="Bottom">
                                 <Line
                             X1="100" Y1="100"
                             X2="50" Y2="120"
@@ -42,6 +42,7 @@
                         <Button Content="-" Width="24" Click="Map_Minus_Click"/>
                         <Label x:Name="lbPointValue" Content="Label"/>
                         <Button Content=">" Width="25" Click="Map_Move_Left"/>
+                        <Button Content="C" Width="25" Click="Map_Move_Center"/>
                     </StackPanel>
                     <Canvas x:Name="graphDraw2" Grid.Row="2" SizeChanged="graphDraw2_SizeChanged">
                         <wpf:WebView2 x:Name="mapViewer" Loaded="mapViewer_Loaded" Initialized="mapViewer_Initialized" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="1500" Height="403" />
@@ -59,10 +60,21 @@
             <ListView x:Name="aaaaaaaaa" Height="100" d:ItemsSource="{Binding LogsList}">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Favourite">
+                        <GridViewColumn Header="Показать" Width="40">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <CheckBox Margin="5, 0" IsChecked="{Binding Selected}"/>
+                                    <!--d:SampleData ItemCount=5
+                                    Your control type and value goes here. Bind the value
+                                     to the name of the method that represents this value
+                                     in your .cs file. In my case, this was 'Favourite' -->
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Flip"  Width="40">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox Margin="5, 0" IsChecked="{Binding Flipped}"/>
                                     <!--d:SampleData ItemCount=5
                                     Your control type and value goes here. Bind the value
                                      to the name of the method that represents this value
@@ -105,9 +117,11 @@
             <Button Content="Выбор отрезка" Click="SegmentSelectBtnClick"/>
             <Button Content="DEBUG" Click="DebugGraphShow"/>
             <Button Content="DEBUG VISIBLE" Click="DebugGraphShowVisible"/>
+            <Button Content="Сохранить видимые" Click="DebugGraphSaveVisible"/>
             <Label Content="Label" x:Name="dtFrom"/>
             <Label Content="Label" x:Name="dtTo"/>
             <Label Content="Label" x:Name="ttt"/>
+            <Label Content="Label" x:Name="rangeSelectInfo"/>
             <Button Content="Показать Атм. Давление" Click="Button_Click_2"/>
             <Button Content="Показать Направление" Click="Button_Click_3"/>
             <CheckBox x:Name="cb_yaling" Content="Выровнять по высоте" Checked="CheckBox_Checked" Unchecked="cb_yaling_Unchecked" IsChecked="True"/>

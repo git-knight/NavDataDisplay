@@ -343,9 +343,13 @@ namespace NavDataDisplay
         void UpdateViewBorders()
         {
             ViewDistTo = 1;
+            ViewBorders = new();
+            var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
             foreach (var dataFile in LogsList.Where(x => x.Selected))
             {
-                ViewBorders = ViewBorders.Combine(dataFile.DataRange);
+                if (dataFile.TimeRanges.TryGetValue(day, out var timeRange))
+                    ViewBorders = ViewBorders.Combine(timeRange);
+
                 ViewDistTo = Math.Max(ViewDistTo, dataFile.MaxDistance);
             }
             
@@ -480,7 +484,11 @@ namespace NavDataDisplay
                 var vMidLast = allPointsFirst.Sum(x => x.Speed) / allPointsFirst.Length;
                 */
 
-                for (var iStep = 1; iStep < steps; iStep++)  
+                var hasLast = false;
+                double vMinLast = 0, vMaxLast = 0, vMidLast = 0;
+                var iStepLast = 0;
+
+                for (var iStep = 0; iStep < steps; iStep++)  
                 {
                     var dtCurrent = ViewRange.Min + step * iStep;
                     var dtRange = new DateRange(dtCurrent, dtCurrent + step);
@@ -497,19 +505,29 @@ namespace NavDataDisplay
                         var vMin = ValueToGraphY((allPoints.Min(x => x.GetValueByGraphNumber(CurrentSelectedParam))));
                         var vMax = ValueToGraphY(allPoints.Max(x => x.GetValueByGraphNumber(CurrentSelectedParam)));
                         var vMid = ValueToGraphY(allPoints.Sum(x => x.GetValueByGraphNumber(CurrentSelectedParam)) / allPoints.Length);
-                        
+
+                        if (!hasLast)
+                        {
+                            vMidLast = vMid;
+                            vMinLast = vMin;
+                            vMaxLast = vMax;
+                            iStepLast = iStep;
+                            hasLast = true;
+                            continue;
+                        }
+
                         dtRange = new DateRange(dtCurrent - step, dtCurrent);
                         var allPointsLast = data.Where(x => dtRange.Includes(x.Time)).ToArray();
-                        if (allPointsLast.Count() == 0)
+                        //if (allPointsLast.Count() == 0)
                         {
                             // draw circle?
                         }
-                        else
+                        //else
                         {
 
-                            var vMinLast = ValueToGraphY(allPointsLast.Min(x => x.GetValueByGraphNumber(CurrentSelectedParam)));
-                            var vMaxLast = ValueToGraphY(allPointsLast.Max(x => x.GetValueByGraphNumber(CurrentSelectedParam)));
-                            var vMidLast = ValueToGraphY(allPointsLast.Sum(x => x.GetValueByGraphNumber(CurrentSelectedParam)) / allPointsLast.Length);
+                            //var vMinLast = ValueToGraphY(allPointsLast.Min(x => x.GetValueByGraphNumber(CurrentSelectedParam)));
+                            //var vMaxLast = ValueToGraphY(allPointsLast.Max(x => x.GetValueByGraphNumber(CurrentSelectedParam)));
+                            //var vMidLast = ValueToGraphY(allPointsLast.Sum(x => x.GetValueByGraphNumber(CurrentSelectedParam)) / allPointsLast.Length);
                             //vMinLast = 200 - vMinLast;
                             //vMaxLast = 200 - vMaxLast;
                             //vMidLast = 200 - vMidLast;
@@ -521,7 +539,7 @@ namespace NavDataDisplay
                                 Stroke = dataFile.Color,
                                 StrokeThickness = 1,
 
-                                X1 = xmin + (xmax - xmin) * (iStep - 1) / steps,
+                                X1 = xmin + (xmax - xmin) * (iStepLast) / steps,
                                 X2 = xmin + (xmax - xmin) * iStep / steps,  // 150 too far
                                 Y1 = vMidLast,
                                 Y2 = vMid
@@ -535,7 +553,7 @@ namespace NavDataDisplay
                                 Opacity = 0.7,
                                 StrokeThickness = 1,
 
-                                X1 = xmin + (xmax - xmin) * (iStep - 1) / steps,
+                                X1 = xmin + (xmax - xmin) * (iStepLast) / steps,
                                 X2 = xmin + (xmax - xmin) * iStep / steps,  // 150 too far
                                 Y1 = vMinLast,
                                 Y2 = vMin
@@ -549,12 +567,15 @@ namespace NavDataDisplay
                                 Opacity = 0.7,
                                 StrokeThickness = 1,
 
-                                X1 = xmin + (xmax - xmin) * (iStep - 1) / steps,
+                                X1 = xmin + (xmax - xmin) * (iStepLast) / steps,
                                 X2 = xmin + (xmax - xmin) * iStep / steps,  // 150 too far
                                 Y1 = vMaxLast ,
                                 Y2 =  vMax 
                             };
                             graphDraw1.Children.Add(myLineMax);
+                            vMaxLast = vMax;
+
+                            iStepLast = iStep;
                         }
 
                     }
@@ -684,11 +705,13 @@ namespace NavDataDisplay
 
         private void DateStart_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
-            ViewRange = new DateRange(DateStart.SelectedDate!.Value, DateStart.SelectedDate!.Value + TimeSpan.FromDays(1));
+            //ViewRange = new DateRange(DateStart.SelectedDate!.Value, DateStart.SelectedDate!.Value + TimeSpan.FromDays(1));
+            UpdateViewBorders();
+            ViewRange = ViewBorders;
             RedrawGraph();
         }
 
-        private void Map_Redraw_Click(object sender, RoutedEventArgs e)
+        private void Map_Redraw_Click(object? sender, RoutedEventArgs? e)
         {
             ViewingDist = false;
             RedrawGraph();
@@ -770,6 +793,8 @@ namespace NavDataDisplay
         double GraphWidth => TotalGraphWidth;
         void DrawPointInfoById(int iStep)
         {
+            if (!LogsList.Any())
+                return;
             var xmax = GraphWidth - 15;
 
             var step = ViewRange.Length / steps;
@@ -957,18 +982,20 @@ namespace NavDataDisplay
 
             var dtStr = dateaaaaaaaaa.SelectedItem as string;
             var dt = DateTime.Parse(dtStr);
+            UpdateViewBorders();
+            ViewRange = ViewBorders;
+            DateStart.SelectedDate = dt; // calls
+            //RedrawGraph();
 
-
-            ViewRange = new DateRange(dt, dt + TimeSpan.FromDays(1));
-            RedrawGraph();
         }
 
+        AGraph graphTrends;
         private void DebugGraphShowVisible(object sender, RoutedEventArgs e)
         {
             var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
             var step = ViewRange.Length / steps;
 
-            var g = new AGraph();
+            graphTrends = new AGraph();
 
             foreach (var dataFile in LogsList.Where(x => x.Selected))
             {
@@ -1004,11 +1031,46 @@ namespace NavDataDisplay
                         marks.Add(new GraphMark(allPoints, vMid));
                     }
                 }
-                g.Feed(marks);
+                graphTrends.Feed(marks);
             }
-            var script = string.Join(", ", g.Marks.Select(x => $"[{x.Lat}, {x.Lon + 0.00015}, {x.Atm.ToString("#.##")}]"));
+            var script = string.Join(", ", graphTrends.Marks.Select(x => $"[{x.Lat}, {x.Lon + 0.00015}, {x.Atm.ToString("#.##")}]"));
             script = $"highlight([{script}])";
             mapViewer.ExecuteScriptAsync(script);
+        }
+
+        private void DebugGraphSaveVisible(object sender, RoutedEventArgs _)
+        {
+            if (graphTrends == null)
+                return;
+
+            var tbl = new Workbook();
+            var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
+            //foreach (var dataFile in LogsList.Where(x => x.Selected))
+            {
+                //if (!dataFile.Data.TryGetValue(day, out var data))
+                //    continue;
+
+                var sheet = new Worksheet($"Тренды");
+                tbl.Worksheets.Add(sheet);
+                sheet.Cells[0, 0] = new Cell("Время");
+                sheet.Cells[0, 1] = new Cell("Широта");
+                sheet.Cells[0, 2] = new Cell("Долгота");
+                sheet.Cells[0, 3] = new Cell("Давление");
+
+                var e = 1;
+                foreach (var entry in graphTrends.Marks)
+                {
+                    //DateTime x;
+                    //x.ToString("dd:FFFF");
+                    sheet.Cells[e, 0] = new Cell(entry.Time.ToString("G"));
+                    sheet.Cells[e, 1] = new Cell(entry.Lat, "#,#######0.0000000");
+                    sheet.Cells[e, 2] = new Cell(entry.Lon, "#,#######0.0000000");
+                    sheet.Cells[e, 3] = new Cell(entry.Atm, "#,####0.0000");
+                    e++;
+                }
+            }
+            tbl.Save("export/dataTrends.xls");
+
         }
 
         private void gridView1_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -1029,7 +1091,16 @@ namespace NavDataDisplay
         private void SegmentSelectBtnClick(object sender, RoutedEventArgs e)
         {
             segId = 1;
-            ttt.Content = "выбор даты";
+            rangeSelectInfo.Content = "выбор даты";
+        }
+
+        private void Map_Move_Center(object sender, RoutedEventArgs e)
+        {
+            var move = ViewBorders.Center - ViewRange.Center;
+            ViewRange.Min += move;
+            ViewRange.Max += move;
+            FixRangeOutOfBounds();
+            Map_Redraw_Click(null, null);
         }
 
         void SelectNextSeg(MouseButtonEventArgs e)
@@ -1040,12 +1111,17 @@ namespace NavDataDisplay
 
             var date = ViewRange.Min + ViewRange.Length * clickFrac;
 
+            rangeSelectInfo.Content += "\n" + date.ToLongTimeString();
             if (segId == 1)
-                dtFrom.Content = date;
-            else dtTo.Content = date;
+                segA = date;
+            else segB = date;
 
             segId = (segId + 1) % 3;
-
+            if (segId == 0)
+            {
+                ViewRange = new DateRange(segA, segB);
+                Map_Redraw_Click(null, null);
+            }
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)

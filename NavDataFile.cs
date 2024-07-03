@@ -16,9 +16,13 @@ namespace NavDataDisplay
         static Random rng = new Random();
 
         public bool Selected { get; set; } = true;
+        public bool Flipped { get; set; }
         public string Path { get; set; }
         public string FileName { get; set; }
-        public Dictionary<DateTime, List<NavDataEntry>> Data { get; } = new Dictionary<DateTime, List<NavDataEntry>>();
+        public Dictionary<DateTime, List<NavDataEntry>> Data => Flipped ? DataFlipped : DataFwd;
+        public Dictionary<DateTime, List<NavDataEntry>> DataFwd { get; } = new Dictionary<DateTime, List<NavDataEntry>>();
+        public Dictionary<DateTime, List<NavDataEntry>> DataFlipped { get; } = new Dictionary<DateTime, List<NavDataEntry>>();
+        public Dictionary<DateTime, DateRange> TimeRanges { get; set; } = new Dictionary<DateTime, DateRange>();
         public DateRange DataRange { get; set; } = new DateRange();
         //public Dictionary<DateTime, int> DataPerDayStartIdx { get; set; } = new Dictionary<DateTime, int>();
         public List<(double m, double l, double h)> CurrentDataSet { get; set; } = new List<(double, double, double)>();
@@ -60,6 +64,25 @@ namespace NavDataDisplay
                 DataRange.Update(entry.Time);
                 //if (!DataPerDayStartIdx.ContainsKey(entry.Time.Date))
                 //    DataPerDayStartIdx.Add(entry.Time.Date, Data.Count - 1);
+            }
+
+            foreach(var day in Data)
+            {
+                var rEntries = new List<NavDataEntry>();
+                var entries = day.Value;
+                DateRange timeRange = new DateRange();
+                foreach (var e in entries)
+                    timeRange.Update(e.Time);
+                TimeRanges.Add(day.Key, timeRange);
+
+
+                for (int i = entries.Count - 1; i >= 0; i--)
+                {
+                    var timeDist = timeRange.Max - entries[i].Time;
+                    rEntries.Add(new NavDataEntry(entries[i], timeRange.Min + timeDist));
+                }
+
+                DataFlipped.Add(day.Key, rEntries);
             }
         }
 

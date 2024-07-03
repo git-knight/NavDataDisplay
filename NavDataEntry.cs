@@ -18,6 +18,18 @@ namespace NavDataDisplay
         public double Distance { get; set; }
 
         public NavDataEntry() { }
+        public NavDataEntry(NavDataEntry other, DateTime time)
+        {
+            Time = time;
+            Lat = other.Lat;
+            Lon = other.Lon;
+
+            Atm = other.Atm;
+            Speed = other.Speed;
+            Angle = other.Angle;
+            Distance = other.Distance;
+        }
+
         public NavDataEntry(string dataEntry)
         {
             if (dataEntry[dataEntry.IndexOf("AZ") - 1] != ';')

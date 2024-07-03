@@ -20,6 +20,7 @@ namespace NavDataDisplay
         public DateTime Max { get; set; } = DateTime.MinValue;
 
         public TimeSpan Length => Max - Min;
+        public DateTime Center => Min + Length / 2;
 
 
         public void Update(DateTime dtNew)

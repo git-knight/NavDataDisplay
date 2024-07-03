@@ -132,7 +132,6 @@
             });
             addArrow(0);
         }
-        var lineHeight = 0.000027*6.5;
 
         function gotoRandom() {
             //ymaps.setCenter([55.12059336166458, 61.23999754716336]);
@@ -225,6 +224,9 @@
             ptCount = 0;
 
         }
+
+        var lineHeight = 0.000027 * 6.5;
+        var lineHeightDef = lineHeight;
         function addArrow(pt1, color ='#00aa22', id=-1) {
             if (ptPrev == null) {
                 ptPrev = pt1;
@@ -252,7 +254,11 @@
                 points.push(i(p));
                 points.push(i(z));
             }*/
-            
+
+            if (yMap.getZoom() < 14)
+                lineHeight = lineHeightDef * 2.5;
+            else lineHeight = lineHeightDef;
+
             var size = [0.001, 0.00003]
             var halfHt = lineHeight / 2
             var x = dist(pt0, pt1)

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace NavDataDisplay
 {
@@ -7,6 +8,7 @@ namespace NavDataDisplay
         public double Lat { get; set; }
         public double Lon { get; set; }
         public double Atm { get; set; }
+        public DateTime Time { get; set; }
 
         public GraphMark() { }
         public GraphMark(NavDataEntry entry)
@@ -14,6 +16,7 @@ namespace NavDataDisplay
             Lat = entry.Lat;
             Lon = entry.Lon;
             Atm = entry.Atm;
+            Time = entry.Time;
         }
 
         public GraphMark(NavDataEntry[] locs, double atm)
