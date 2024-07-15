@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -50,6 +52,20 @@ namespace NavDataDisplay
 
         public MainWindow()
         {
+            var customCulture = (CultureInfo)Thread.CurrentThread.CurrentCulture.Clone();
+
+            // Настраиваем числовой формат (используем точку как разделитель)
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            customCulture.NumberFormat.CurrencyDecimalSeparator = ".";
+
+            // Настраиваем формат даты (день/месяц/год)
+            customCulture.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
+            customCulture.DateTimeFormat.LongDatePattern = "dd MMMM yyyy";
+
+            // Применяем настройки ко всему приложению
+            Thread.CurrentThread.CurrentCulture = customCulture;
+            Thread.CurrentThread.CurrentUICulture = customCulture;
+
             InitializeComponent();
 
             this.DataContext = this;
@@ -746,7 +762,9 @@ namespace NavDataDisplay
             }
             if (lastPt != null)
                 script += $"yMap.setCenter([{lastPt.Lat}, {lastPt.Lon}]);\n";
+            //var scriptOneLine = script.Replace('\n', ' ');
             mapViewer.ExecuteScriptAsync(script);
+            
             //"addArrow([55.7502, 37.6136], [55.7542, 37.6196])");
             // yMap.setCenter([45.0701, 38.9048]);addMarkColored(yMap, 45.0701, 38.9048, 14, 20, '#dd0000');");
             //RedrawMap();
