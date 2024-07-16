@@ -117,7 +117,7 @@
             <Button Content="Выбор отрезка" Click="SegmentSelectBtnClick"/>
             <Button Content="DEBUG" Click="DebugGraphShow"/>
             <Button Content="DEBUG VISIBLE" Click="DebugGraphShowVisible"/>
-            <Button Content="Сохранить видимые" Click="DebugGraphSaveVisible"/>
+            <Button Content="Сохранить тренды" Click="DebugGraphSaveVisible"/>
             <Label Content="Label" x:Name="dtFrom"/>
             <Label Content="Label" x:Name="dtTo"/>
             <Label Content="Label" x:Name="ttt"/>

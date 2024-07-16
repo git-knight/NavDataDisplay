@@ -207,15 +207,20 @@ namespace NavDataDisplay
             };
             graphDrawXline.Children.Add(xLine);
 
+            bool drawFwdTime = LogsList.Any(x => x.Selected && !x.Flipped);
+            bool drawBwdTime = LogsList.Any(x => x.Selected && x.Flipped);
+
             var step = ViewRange.Length / steps;
-            for (var i = 0; i < steps; i++)
+            var xstep = (xmax - xmin) / steps;
+            for (var i = 0; i <= steps; i += 2)
             {
-                Line myLine1 = new Line
+                var xcurr = xmin + i * xstep; //i * 25 + 5
+                Line myLine1 = new()
                 {
                     Stroke = (i % 5 == 4) ? Brushes.LightGray : Brushes.Gainsboro,
 
-                    X1 = i * 25 + 5,
-                    X2 = i * 25 + 5,  // 150 too far
+                    X1 = xcurr,
+                    X2 = xcurr,  // 150 too far
                     Y1 = 0,
                     Y2 = 1000,
 
@@ -233,18 +238,18 @@ namespace NavDataDisplay
                 //Canvas.SetTop(b, yT + 15);
                 //graphDrawXline.Children.Add(b);
 
-                var nFreq = 3;
+                var nFreq = 10;
 
                 if (i % nFreq == 0)
                 {
-                    Line xMark = new Line
+                    Line xMark = new()
                     {
-                        Stroke =Brushes.Black,
+                        Stroke = Brushes.Black,
 
-                        X1 = i * 25 + 5,
-                        X2 = i * 25 + 5,  // 150 too far
-                        Y1 = yT-5,
-                        Y2 = yT+5,
+                        X1 = xcurr,
+                        X2 = xcurr,  // 150 too far
+                        Y1 = yT - 5,
+                        Y2 = yT + 5,
 
                         StrokeThickness = 0.5
                     };
@@ -252,19 +257,46 @@ namespace NavDataDisplay
                     graphDrawXline.Children.Add(xMark);
 
                     var dtCurrent = ViewRange.Min + step * i;
-                    var b1 = new TextBlock
+                    var dtCurrentBwd = ViewRange.Min + step * (steps - 1 - i);
+                    var left = xcurr;
+
+                    if (drawFwdTime)
                     {
-                        Text = (ViewingDist) ? $"{i * ViewDistStep}" : dtCurrent.ToString("T"),
-                        TextAlignment = TextAlignment.Center,
-                        FontSize = 10.6,
-                        Foreground = Brushes.Gray,
-                    };
-                    Canvas.SetLeft(b1, i * 25 + 5);
-                    Canvas.SetTop(b1, yT - 18);
+                        var b1 = new TextBlock
+                        {
+                            Text = (ViewingDist) ? $"{i * ViewDistStep}" : dtCurrent.ToString("T"),
+                            TextAlignment = TextAlignment.Center,
+                            FontSize = 10.6,
+                            Foreground = Brushes.Gray,
+                        };
+                        Canvas.SetLeft(b1, left);
+                        Canvas.SetTop(b1, yT - 18);
 
-                    b1.RenderTransform = new RotateTransform(-22, 0, 1);
+                        b1.RenderTransform = new RotateTransform(-22, 0, 1);
 
-                    graphDrawXline.Children.Add(b1);
+                        graphDrawXline.Children.Add(b1);
+
+                        left += 7;
+                    }
+                    
+                    if (drawBwdTime)
+                    {
+                        var b1 = new TextBlock
+                        {
+                            Text = (ViewingDist) ? $"-{(steps - 1 - i) * ViewDistStep}" : "-" + dtCurrentBwd.ToString("T"),
+                            TextAlignment = TextAlignment.Center,
+                            FontSize = 10.6,
+                            Foreground = Brushes.Gray,
+                        };
+                        Canvas.SetLeft(b1, left);
+                        Canvas.SetTop(b1, yT - 18);
+
+                        b1.RenderTransform = new RotateTransform(-22, 0, 1);
+
+                        graphDrawXline.Children.Add(b1);
+
+                        left += 7;
+                    }
                 }
 
 
@@ -350,6 +382,7 @@ namespace NavDataDisplay
         const double xmin = 30;
         const double ymin = 30;
         const double ymax = 400;
+        double xmax => GraphWidth - 15;
         const double graphYoffsetTop = 15;
         const double graphYoffsetBottom = 15;
 
@@ -375,8 +408,6 @@ namespace NavDataDisplay
 
         void DrawDistGraph()
         {
-            var xmax = GraphWidth - 15;
-
             var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
 
             foreach (var dataFile in LogsList.Where(x => x.Selected))
@@ -451,13 +482,11 @@ namespace NavDataDisplay
             if (cb_yaling.IsChecked == true)
                 AlignY();
 
-            var xmax = GraphWidth - 15;
-
             graphDraw1.Children.Clear();
 
             ellipses.Clear();
 
-            if (LogsList.Count == 0)
+            if (!LogsList.Any(x => x.Selected))
                 return;
 
             FixRangeOutOfBounds();
@@ -626,7 +655,7 @@ namespace NavDataDisplay
         private void Map_Plus_Click(object sender, RoutedEventArgs e)
         {
             ViewRange = new DateRange(ViewRange.Min + ViewRange.Length * 0.25, ViewRange.Max - ViewRange.Length * 0.25);
-            RedrawGraph();
+            //RedrawGraph();
 
             Map_Redraw_Click(null, null);
 
@@ -636,7 +665,7 @@ namespace NavDataDisplay
         {
             ViewRange = new DateRange(ViewRange.Min - ViewRange.Length * 0.25, ViewRange.Max + ViewRange.Length * 0.25);
             FixRangeOutOfBounds();
-            RedrawGraph();
+            //RedrawGraph();
             Map_Redraw_Click(null, null);
         }
 
@@ -664,7 +693,7 @@ namespace NavDataDisplay
                 }
                 UpdateViewBorders();
                 ViewRange = ViewBorders;
-                RedrawGraph();
+                //RedrawGraph();
             }
 
         }
@@ -709,6 +738,7 @@ namespace NavDataDisplay
             ViewRange = new DateRange(ViewRange.Min + step, ViewRange.Max + step);
             FixRangeOutOfBounds();
             RedrawGraph();
+            RedrawMapPath();
         }
 
         private void Map_Move_Left(object sender, RoutedEventArgs e)
@@ -717,6 +747,7 @@ namespace NavDataDisplay
             ViewRange = new DateRange(ViewRange.Min - step, ViewRange.Max - step);
             FixRangeOutOfBounds();
             RedrawGraph();
+            RedrawMapPath();
         }
 
         private void DateStart_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
@@ -725,55 +756,11 @@ namespace NavDataDisplay
             UpdateViewBorders();
             ViewRange = ViewBorders;
             RedrawGraph();
+            RedrawMapPath();
         }
 
-        private void Map_Redraw_Click(object? sender, RoutedEventArgs? e)
+        void RedrawMapPath()
         {
-            ViewingDist = false;
-            RedrawGraph();
-            var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
-            var step = ViewRange.Length / steps;
-            var script = "resetArrows();\n";
-            NavDataEntry lastPt = null;
-            foreach (var dataFile in LogsList.Where(x => x.Selected))
-            {
-                if (!dataFile.Data.TryGetValue(day, out var data))
-                    continue;
-
-                var coords = new List<NavDataEntry>();
-
-                for (var iStep = 0; iStep < steps; iStep++)
-                {
-                    var dtCurrent = ViewRange.Min + step * iStep;
-                    var dtRange = new DateRange(dtCurrent, dtCurrent + step);
-
-                    var allPoints = data.Where(x => dtRange.Includes(x.Time)).ToArray();
-                    if (allPoints.Count() == 0)
-                        continue;
-
-                    coords.Add(allPoints.Last());
-                    lastPt = coords.Last();
-                }
-                if (coords.Count > 1) {
-                    script += "startPath();\n";
-                    var c = ((SolidColorBrush)dataFile.Color).Color;
-                    script += string.Join("\n", coords.Select(x => $"addArrow([{x.Lat}, {x.Lon}], '#{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}', {coords.IndexOf(x)});")) + "\n"; // dataFile.Data[day].Take(60)
-                }
-            }
-            if (lastPt != null)
-                script += $"yMap.setCenter([{lastPt.Lat}, {lastPt.Lon}]);\n";
-            //var scriptOneLine = script.Replace('\n', ' ');
-            mapViewer.ExecuteScriptAsync(script);
-            
-            //"addArrow([55.7502, 37.6136], [55.7542, 37.6196])");
-            // yMap.setCenter([45.0701, 38.9048]);addMarkColored(yMap, 45.0701, 38.9048, 14, 20, '#dd0000');");
-            //RedrawMap();
-        }
-
-        private void Map_Redraw_Distance_Click(object sender, RoutedEventArgs e)
-        {
-            ViewingDist = true;
-            RedrawGraph();
             var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
             var step = ViewRange.Length / steps;
             var script = "resetArrows();\n";
@@ -800,20 +787,38 @@ namespace NavDataDisplay
                 if (coords.Count > 1)
                 {
                     script += "startPath();\n";
-                    script += string.Join("\n", coords.Select(x => $"addArrow([{x.Lat}, {x.Lon}]);")) + "\n"; // dataFile.Data[day].Take(60)
+                    var c = ((SolidColorBrush)dataFile.Color).Color;
+                    script += string.Join("\n", coords.Select(x => $"addArrow([{x.Lat}, {x.Lon}], '#{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}', {coords.IndexOf(x)});")) + "\n"; // dataFile.Data[day].Take(60)
                 }
             }
             if (lastPt != null)
                 script += $"yMap.setCenter([{lastPt.Lat}, {lastPt.Lon}]);\n";
+            //var scriptOneLine = script.Replace('\n', ' ');
             mapViewer.ExecuteScriptAsync(script);
+        }
+
+        private void Map_Redraw_Click(object? sender, RoutedEventArgs? e)
+        {
+            ViewingDist = false;
+            RedrawGraph();
+            RedrawMapPath();
+            //"addArrow([55.7502, 37.6136], [55.7542, 37.6196])");
+            // yMap.setCenter([45.0701, 38.9048]);addMarkColored(yMap, 45.0701, 38.9048, 14, 20, '#dd0000');");
+            //RedrawMap();
+        }
+
+        private void Map_Redraw_Distance_Click(object sender, RoutedEventArgs e)
+        {
+            ViewingDist = true;
+            RedrawGraph();
+            RedrawMapPath();
         }
 
         double GraphWidth => TotalGraphWidth;
         void DrawPointInfoById(int iStep)
         {
-            if (!LogsList.Any())
+            if (!LogsList.Any(x => x.Selected))
                 return;
-            var xmax = GraphWidth - 15;
 
             var step = ViewRange.Length / steps;
 
@@ -842,7 +847,7 @@ namespace NavDataDisplay
 
                 Canvas.SetTop(pt.Ellipse, vMid - 3);
                 Canvas.SetTop(pt.Text, vMid - 30);
-                pt.Text.Text = $"{allPoints.Length} точек\n{vMidValue}";
+                pt.Text.Text = $"{allPoints.Length} точек\n{vMidValue}\n{allPoints.First().Time.ToString("T")}";
 
                 ttt.Content = iStep + "  " + (ymin + vMid - 3);
             }
@@ -850,8 +855,6 @@ namespace NavDataDisplay
         }
         private void drawPointInfo(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            var xmax = GraphWidth - 15;
-
             var iStep = (int)Math.Round((e.GetPosition(CanvasCurr).X - xmin) / (xmax - xmin) * steps);
 
             DrawPointInfoById(iStep);
@@ -952,7 +955,6 @@ namespace NavDataDisplay
                 return;
             }
 
-            var xmax = GraphWidth - 15;
             var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
             var step = ViewRange.Length / steps;
             var iStepC = (int)Math.Round((e.GetPosition(CanvasCurr).X - xmin) / (xmax - xmin) * steps);
@@ -1058,8 +1060,11 @@ namespace NavDataDisplay
 
         private void DebugGraphSaveVisible(object sender, RoutedEventArgs _)
         {
-            if (graphTrends == null)
+            if (!Logs.Keys.Any() || graphTrends == null)
                 return;
+
+            Directory.CreateDirectory("export");
+            //SaveEntries(Logs.Keys.First());
 
             var tbl = new Workbook();
             var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
@@ -1123,7 +1128,6 @@ namespace NavDataDisplay
 
         void SelectNextSeg(MouseButtonEventArgs e)
         {
-            var xmax = GraphWidth - 15;
             var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
             var clickFrac = (e.GetPosition(CanvasCurr).X - xmin) / (xmax - xmin);
 
