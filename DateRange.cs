@@ -19,6 +19,7 @@ namespace NavDataDisplay
         public DateTime Min { get; set; } = DateTime.MaxValue;
         public DateTime Max { get; set; } = DateTime.MinValue;
 
+        public bool Initialized => Min != DateTime.MaxValue;
         public TimeSpan Length => Max - Min;
         public DateTime Center => Min + Length / 2;
 

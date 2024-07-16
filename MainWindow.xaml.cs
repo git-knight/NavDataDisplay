@@ -421,6 +421,8 @@ namespace NavDataDisplay
                     var distCurr = ViewDistStep * iStep;
 
                     var i1 = data.FindIndex(x => x.Distance > distCurr);
+                    if (i1 == -1)
+                        break;
                     var val = data[i1].GetValueByGraphNumber(CurrentSelectedParam);
                     if (data[i1].Distance != distCurr)
                     {
@@ -474,6 +476,9 @@ namespace NavDataDisplay
         bool k = false;
         void RedrawGraph()
         {
+            if (!ViewRange.Initialized)
+                return;
+
             if (k == false && IsLoaded)
             {
                 k = true;
@@ -761,6 +766,9 @@ namespace NavDataDisplay
 
         void RedrawMapPath()
         {
+            if (!ViewRange.Initialized)
+                return;
+
             var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
             var step = ViewRange.Length / steps;
             var script = "resetArrows();\n";
@@ -847,7 +855,7 @@ namespace NavDataDisplay
 
                 Canvas.SetTop(pt.Ellipse, vMid - 3);
                 Canvas.SetTop(pt.Text, vMid - 30);
-                pt.Text.Text = $"{allPoints.Length} точек\n{vMidValue}\n{allPoints.First().Time.ToString("T")}";
+                pt.Text.Text = $"{allPoints.Length} точек\n{vMidValue}\nВремя: {allPoints.First().Time.ToString("T")}\nРасстояние: {allPoints.First().Distance}";
 
                 ttt.Content = iStep + "  " + (ymin + vMid - 3);
             }
