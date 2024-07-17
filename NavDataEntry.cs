@@ -38,7 +38,7 @@ namespace NavDataDisplay
             var parts = dataEntry.Split(';');
 
             var time = long.Parse(dataEntry.Substring(5, 13));
-            Time = new DateTime(621355968000000000 + time * 10 * 1000, DateTimeKind.Utc);
+            Time = new DateTime(621355968000000000 + time * 10 * 1000, DateTimeKind.Utc) + TimeSpan.FromHours(3);
             Lat = float.Parse(parts[1].Substring(2), CultureInfo.InvariantCulture.NumberFormat);
             Lon = float.Parse(parts[2].Substring(2), CultureInfo.InvariantCulture.NumberFormat);
             Atm = float.Parse(parts[3].Substring(2), CultureInfo.InvariantCulture.NumberFormat);
