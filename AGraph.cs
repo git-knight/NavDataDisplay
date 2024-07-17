@@ -55,7 +55,7 @@ namespace NavDataDisplay
                 var data = dataDayId.Value;
                 var lastPeak = data[0].Atm;
                 var isAsc = data[1].Atm > lastPeak;
-                AddMark(data[0]);
+                //AddMark(data[0]);
 
                 for (var i = 1; i < data.Count; i++)
                 {
@@ -73,7 +73,7 @@ namespace NavDataDisplay
         {
             var lastPeak = marks[0].Atm;
             var isAsc = marks[1].Atm > lastPeak;
-            AddMark(marks[0]);
+            //AddMark(marks[0]);
 
             for (var i = 1; i < marks.Count; i++)
             {
@@ -84,6 +84,47 @@ namespace NavDataDisplay
                     isAsc = isAscCurr;
                 }
             }
+        }
+
+        const double trhdDef = 0.01;
+
+        public void ApplyThreshold(double threshold = trhdDef)
+        {
+            var i = 0;
+            while (i < Marks.Count - 2) 
+            {
+                if((Marks[i].Atm < Marks[i + 1].Atm) == (Marks[i+1].Atm < Marks[i + 2].Atm))
+                {
+                    Marks.RemoveAt(i + 1);
+                    i = 0;
+                }
+                else if (Math.Abs(Marks[i].Atm - Marks[i + 1].Atm) <= threshold)
+                {
+                    Marks[i].Atm += Marks[i + 1].Atm - Marks[i + 2].Atm;
+                    Marks.RemoveRange(i + 1, 2);
+                    i = 0;
+                }
+                else i++;
+            }
+        }
+
+        bool CheckPos(int i, double[] values, double threshold)
+        {
+            for (var j = 0; j < values.Length; j++)
+                if (Math.Abs(Marks[i + j].Atm - values[j]) > threshold)
+                    return false;
+            return true;
+        }
+
+
+
+        public int? FindSeq(double[] values, double threshold = trhdDef)
+        {
+            for (int i = 0; i < Marks.Count - values.Length; i++)
+                if (CheckPos(i, values, threshold))
+                    return i; 
+            
+            return null;
         }
     }
 }

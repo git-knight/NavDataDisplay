@@ -1083,6 +1083,7 @@ namespace NavDataDisplay
                 }
                 graphTrends.Feed(marks);
             }
+            graphTrends.ApplyThreshold(0.05);
             var script = string.Join(", ", graphTrends.Marks.Select(x => $"[{x.Lat}, {x.Lon + 0.00015}, {x.Atm.ToString("#.##")}]"));
             script = $"highlight([{script}])";
             mapViewer.ExecuteScriptAsync(script);

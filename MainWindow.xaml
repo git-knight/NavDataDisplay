@@ -54,6 +54,13 @@
                 <Grid Background="#FFE5E5E5">
                 </Grid>
             </TabItem>
+            <TabItem Header="ValuesTest">
+                <Grid Background="#FFE5E5E5">
+                    <ListBox x:Name="lValuesExtrTest" Height="200" d:ItemsSource="{Binding Path=DatesList}" MouseDoubleClick="dateaaaaaaaaa_MouseDoubleClick">
+
+                    </ListBox>
+                </Grid>
+            </TabItem>
         </TabControl>
         <StackPanel HorizontalAlignment="Right" Width="195">
             <Label Content="Файлы"/>

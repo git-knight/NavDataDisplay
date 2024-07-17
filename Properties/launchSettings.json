@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Remote": {
+      "commandName": "Project",
+      "remoteDebugEnabled": true,
+      "remoteDebugMachine": "DESKTOP-EGI9LRG:4026",
+      "jsWebView2Debugging": false,
+      "authenticationMode": "Windows"
+    },
+    "Local": {
+      "commandName": "Project",
+      "jsWebView2Debugging": false
+    }
+  }
+}
