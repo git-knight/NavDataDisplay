@@ -22,6 +22,32 @@ namespace NavDataDisplay
             Marks.Add(entry);
         }
 
+        public void Feed(IEnumerable<NavDataEntry> data)
+        {
+            bool? isAsc = null;
+
+            NavDataEntry? entryLast = null;
+            foreach(var entry in data)
+            {
+                if (entryLast == null)
+                {
+                    AddMark(entry);
+                    entryLast = entry;
+                    continue;
+                }
+
+                var isAscCurr = entry.Atm > entryLast.Atm;
+                isAsc ??= isAscCurr;
+                if (isAsc != isAscCurr)
+                {
+                    AddMark(entryLast);
+                    isAsc = isAscCurr;
+                }
+
+                entryLast = entry;
+            }
+        }
+
         public void Feed(NavDataFile dataFile)
         {
             foreach (var dataDayId in dataFile.Data)

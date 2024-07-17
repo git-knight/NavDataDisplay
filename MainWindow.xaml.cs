@@ -35,7 +35,7 @@ namespace NavDataDisplay
         bool ViewingDist = false;
         int ViewDistFrom = 0, ViewDistTo = 0;
         int ViewDistLen, ViewDistStep = 125;
-        DateTime dtCurr;
+        DateTime SelectedDate => DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
 
         int currPar = 0;
 
@@ -412,7 +412,7 @@ namespace NavDataDisplay
 
             foreach (var dataFile in LogsList.Where(x => x.Selected))
             {
-                if (!dataFile.Data.TryGetValue(day, out var data))
+                if (!dataFile.DataFwd.TryGetValue(day, out var data))
                     continue;
 
                 var valPrev = 0.0;
@@ -829,11 +829,10 @@ namespace NavDataDisplay
                 return;
 
             var step = ViewRange.Length / steps;
-
-            ttt.Content = iStep;
-
             var dtCurrent = ViewRange.Min + step * iStep;
             var dtRange = new DateRange(dtCurrent, dtCurrent + step);
+
+            ttt.Content = iStep;
 
             foreach (var pt in ellipses)
             {
@@ -849,6 +848,23 @@ namespace NavDataDisplay
 
                 var vMidValue = allPoints.Sum(x => x.GetValueByGraphNumber(CurrentSelectedParam)) / allPoints.Length;
                 var vMid = ValueToGraphY(vMidValue);
+
+                if (ViewingDist)
+                {
+                    var distCurr = ViewDistStep * iStep;
+
+                    var i1 = data.FindIndex(x => x.Distance > distCurr);
+                    if (i1 == -1)
+                        break;
+                    var val = data[i1].GetValueByGraphNumber(CurrentSelectedParam);
+                    if (data[i1].Distance != distCurr)
+                    {
+                        val = Lerp(data[i1 - 1].GetValueByGraphNumber(CurrentSelectedParam), val,
+                            (distCurr - data[i1 - 1].Distance) / (data[i1].Distance - data[i1 - 1].Distance));
+                    }
+
+                    vMid = ValueToGraphY(val);
+                }
 
                 Canvas.SetLeft(pt.Ellipse, xmin + iStep * (xmax - xmin) / steps - 3);
                 Canvas.SetLeft(pt.Text, xmin + iStep * (xmax - xmin) / steps);
@@ -997,7 +1013,14 @@ namespace NavDataDisplay
         private void DebugGraphShow(object sender, RoutedEventArgs e)
         {
             var g = new AGraph();
-            g.Feed(LogsList[0]);
+
+            //foreach (var dataFile in LogsList.Where(x => x.Selected))
+            //{
+            //    if (!dataFile.Data.TryGetValue(SelectedDate, out var data))
+            //        continue;
+
+                g.Feed(LogsList[0]);
+            //}
             var script = string.Join(", ", g.Marks.Select(x => $"[{x.Lat}, {x.Lon + 0.00015}, {x.Atm.ToString("#.##")}]"));
             script = $"highlight([{script}])";
             mapViewer.ExecuteScriptAsync(script);
@@ -1020,7 +1043,6 @@ namespace NavDataDisplay
         AGraph graphTrends;
         private void DebugGraphShowVisible(object sender, RoutedEventArgs e)
         {
-            var day = DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
             var step = ViewRange.Length / steps;
 
             graphTrends = new AGraph();
@@ -1028,7 +1050,7 @@ namespace NavDataDisplay
             foreach (var dataFile in LogsList.Where(x => x.Selected))
             {
                 var marks = new List<GraphMark>();
-                if (!dataFile.Data.TryGetValue(day, out var data))
+                if (!dataFile.Data.TryGetValue(SelectedDate, out var data))
                     continue;
 
                 /*var dtLast = DtDataOnly.Min;
@@ -1123,6 +1145,8 @@ namespace NavDataDisplay
         {
             segId = 1;
             rangeSelectInfo.Content = "выбор даты";
+            redMessage.Visibility = Visibility.Visible;
+            redMessage.Content = "Выберите начало отрезка";
         }
 
         private void Map_Move_Center(object sender, RoutedEventArgs e)
@@ -1140,18 +1164,24 @@ namespace NavDataDisplay
             var clickFrac = (e.GetPosition(CanvasCurr).X - xmin) / (xmax - xmin);
 
             var date = ViewRange.Min + ViewRange.Length * clickFrac;
-
-            rangeSelectInfo.Content += "\n" + date.ToLongTimeString();
+            var words = new string[] { "", "Начало", "Конец" };
+            rangeSelectInfo.Content += $"\n{words[segId]}: " + date.ToLongTimeString();
             if (segId == 1)
-                segA = date;
-            else segB = date;
-
-            segId = (segId + 1) % 3;
-            if (segId == 0)
             {
+                segA = date;
+                redMessage.Content = "Выберите конец отрезка";
+            }
+            else
+            {
+                segB = date;
+                redMessage.Content = "";
+                redMessage.Visibility = Visibility.Collapsed;
+
                 ViewRange = new DateRange(segA, segB);
                 Map_Redraw_Click(null, null);
             }
+
+            segId = (segId + 1) % 3;
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)

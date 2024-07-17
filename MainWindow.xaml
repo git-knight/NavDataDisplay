@@ -121,6 +121,7 @@
             <Label Content="Label" x:Name="dtFrom"/>
             <Label Content="Label" x:Name="dtTo"/>
             <Label Content="Label" x:Name="ttt"/>
+            <Label Content="Label" x:Name="redMessage" Foreground="#FFE20000" FontStyle="Italic" Visibility="Collapsed"/>
             <Label Content="Label" x:Name="rangeSelectInfo"/>
             <Button Content="Показать Атм. Давление" Click="Button_Click_2"/>
             <Button Content="Показать Направление" Click="Button_Click_3"/>
