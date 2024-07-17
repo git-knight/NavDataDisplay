@@ -56,9 +56,16 @@
             </TabItem>
             <TabItem Header="ValuesTest">
                 <Grid Background="#FFE5E5E5">
-                    <ListBox x:Name="lValuesExtrTest" Height="200" d:ItemsSource="{Binding Path=DatesList}" MouseDoubleClick="dateaaaaaaaaa_MouseDoubleClick">
+                    <StackPanel>
+                        <ListBox x:Name="lValuesExtrTest" Height="200" ItemsSource="{Binding Path=ValuesExtrTest}">
 
-                    </ListBox>
+                        </ListBox>
+                        <Button Content="Удалить выбранное"/>
+                        <Separator/>
+                        <TextBox/>
+                        <Button Content="Добавить значение"/>
+                        <Button Content="Найти" Click="Button_FindTestSeqExtr"/>
+                    </StackPanel>
                 </Grid>
             </TabItem>
         </TabControl>

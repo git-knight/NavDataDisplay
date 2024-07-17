@@ -37,6 +37,8 @@ namespace NavDataDisplay
         int ViewDistLen, ViewDistStep = 125;
         DateTime SelectedDate => DateStart.SelectedDate ?? new DateTime(2023, 10, 30);
 
+        public ObservableCollection<double> ValuesExtrTest { get; } = new ObservableCollection<double>(new double[] { 992.43, 990.73, 992.32, 991.93 });  
+
         int currPar = 0;
 
         Canvas CanvasCurr => tabs.SelectedIndex == 0 ? graphDraw1 : graphDraw2;
@@ -1157,6 +1159,13 @@ namespace NavDataDisplay
             ViewRange.Max += move;
             FixRangeOutOfBounds();
             Map_Redraw_Click(null, null);
+        }
+
+        private void Button_FindTestSeqExtr(object sender, RoutedEventArgs e)
+        {
+            var id = graphTrends.FindSeq(ValuesExtrTest.ToArray());
+            ttt.Content = $"{id}";
+
         }
 
         void SelectNextSeg(MouseButtonEventArgs e)
