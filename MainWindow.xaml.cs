@@ -436,7 +436,7 @@ namespace NavDataDisplay
                     {
                         Line myLineMid = new Line
                         {
-                            Stroke = dataFile.Color,
+                            Stroke = dataFile.FColor,
                             StrokeThickness = 1,
 
                             X1 = xmin + (xmax - xmin) * (iStep - 1) / steps,
@@ -588,7 +588,7 @@ namespace NavDataDisplay
 
                             Line myLineMid = new Line
                             {
-                                Stroke = dataFile.Color,
+                                Stroke = dataFile.FColor,
                                 StrokeThickness = 1,
 
                                 X1 = xmin + (xmax - xmin) * (iStepLast) / steps,
@@ -601,7 +601,7 @@ namespace NavDataDisplay
 
                             Line myLineMin = new Line
                             {
-                                Stroke = dataFile.Color,
+                                Stroke = dataFile.FColor,
                                 Opacity = 0.7,
                                 StrokeThickness = 1,
 
@@ -615,7 +615,7 @@ namespace NavDataDisplay
 
                             Line myLineMax = new Line
                             {
-                                Stroke = dataFile.Color,
+                                Stroke = dataFile.FColor,
                                 Opacity = 0.7,
                                 StrokeThickness = 1,
 
@@ -797,7 +797,7 @@ namespace NavDataDisplay
                 if (coords.Count > 1)
                 {
                     script += "startPath();\n";
-                    var c = ((SolidColorBrush)dataFile.Color).Color;
+                    var c = ((SolidColorBrush)dataFile.FColor).Color;
                     script += string.Join("\n", coords.Select(x => $"addArrow([{x.Lat}, {x.Lon}], '#{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}', {coords.IndexOf(x)});")) + "\n"; // dataFile.Data[day].Take(60)
                 }
             }

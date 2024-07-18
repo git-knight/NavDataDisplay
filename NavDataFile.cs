@@ -30,7 +30,8 @@ namespace NavDataDisplay
 
         public int MaxDistance => (int)Math.Ceiling(Data.Select(x => x.Value.Select(v => v.Distance).Aggregate(Math.Max)).Aggregate(Math.Max));
 
-        public Brush Color { get; set; } = new Brush[] {
+        public Brush FColor { get; set; } = new Brush[] {
+        /*
         Brushes.Green,
         Brushes.DarkRed,
         Brushes.DarkMagenta,
@@ -40,8 +41,20 @@ namespace NavDataDisplay
         Brushes.DodgerBlue,
         Brushes.ForestGreen,
         Brushes.Fuchsia,
+        new SolidColorBrush(Color.FromRgb(155,100,50)),
         Brushes.Indigo,
-        Brushes.Ivory}.OrderBy(x => Guid.NewGuid()).First();
+        Brushes.Ivory
+        */
+          
+            new SolidColorBrush(Color.FromRgb (81, 45, 168)),
+            new SolidColorBrush(Color.FromRgb (48, 63, 159)),
+            new SolidColorBrush(Color.FromRgb (0, 121, 107)),
+            new SolidColorBrush(Color.FromRgb (56, 142, 60)),
+            new SolidColorBrush(Color.FromRgb (245, 124, 0)),
+            new SolidColorBrush(Color.FromRgb (230, 74, 25)),
+            new SolidColorBrush(Color.FromRgb (93, 64, 55)),
+            new SolidColorBrush(Color.FromRgb (69, 90, 100))
+        }.OrderBy(x => Guid.NewGuid()).First();
 
 
         public NavDataFile(string path)
